@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,7 @@ locals {
 }
 
 module "project" {
-  source  = "terraform-google-modules/project-factory/google"
-  version = "~> 18.0"
-
-  name              = "ci-cloud-storage"
-  random_project_id = "true"
-  org_id            = var.org_id
-  folder_id         = var.folder_id
-  billing_account   = var.billing_account
+  source  = "../.."
 
   activate_apis = local.apis_to_activate
 }
