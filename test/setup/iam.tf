@@ -30,28 +30,36 @@ locals {
       "roles/iam.serviceAccountUser",
     ]
   }
-
-  int_required_roles = concat([
-    "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-    "roles/iam.serviceAccountUser",
-    "roles/storage.admin",
-  ], flatten(values(local.per_module_roles)))
 }
 
 resource "google_service_account" "int_test" {
-  project      = module.project.project_id
+  for_each = module.project
+
+  project      = each.value.project_id
   account_id   = "ci-cloud-storage"
   display_name = "ci-cloud-storage"
 }
 
-resource "google_project_iam_member" "int_test" {
-  count = length(local.int_required_roles)
+resource "google_project_iam_custom_role" "int_test" {
+  for_each = module.project
 
-  project = module.project.project_id
-  role    = local.int_required_roles[count.index]
-  member  = "serviceAccount:${google_service_account.int_test.email}"
+  role_id = "int_test_role"
+  title = "Testing role"
+  permissions = local.per_module_roles[each.key]
+  project = each.value.project_id
+  description = "Convenient bundle of roles for testing"
+}
+
+resource "google_project_iam_member" "int_test" {
+  for_each = module.project
+
+  project = each.value.project_id
+  role    = "projects/${each.value.project_id}/roles/${google_project_iam_custom_role.int_test[each.value.project_id].role_id}"
+  member  = "serviceAccount:${google_service_account.int_test[each.value.project_id].email}"
 }
 
 resource "google_service_account_key" "int_test" {
-  service_account_id = google_service_account.int_test.id
+  for_each = module.project
+
+  service_account_id = google_service_account.int_test[each.value.project_id].id
 }

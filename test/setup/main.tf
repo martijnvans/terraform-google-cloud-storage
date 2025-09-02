@@ -31,6 +31,8 @@ locals {
 }
 
 module "project" {
+  for_each = local.per_module_services
+
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 18.0"
 
@@ -40,10 +42,5 @@ module "project" {
   folder_id         = var.folder_id
   billing_account   = var.billing_account
 
-  activate_apis = concat([
-    "cloudresourcemanager.googleapis.com",
-    "compute.googleapis.com",
-    "serviceusage.googleapis.com",
-    "storage-api.googleapis.com",
-  ], flatten(values(local.per_module_services)))
+  activate_apis = each.value
 }
