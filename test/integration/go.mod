@@ -64,3 +64,5 @@ require (
 	sigs.k8s.io/kustomize/kyaml v0.20.0 // indirect
 	sigs.k8s.io/yaml v1.5.0 // indirect
 )
+
+replace github.com/GoogleCloudPlatform/cloud-foundation-toolkit/infra/blueprint-test => github.com/martijnvans/cloud-foundation-toolkit/infra/blueprint-test v0.0.1
