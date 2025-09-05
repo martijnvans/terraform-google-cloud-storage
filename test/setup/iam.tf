@@ -41,6 +41,9 @@ resource "google_service_account" "int_test" {
 }
 
 resource "google_project_iam_member" "int_test" {
+  // For each pair (moduleName, role), make a map entry from
+  //   "moduleName.role" => {key, serviceAccount, role)
+  // to apply below. Structure from https://discuss.hashicorp.com/t/foreach-loop-with-nested-list/54610.
   for_each = {
     for combination in flatten([
       for moduleName, proj in module.project : [
