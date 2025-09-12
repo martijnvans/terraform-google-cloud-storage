@@ -28,10 +28,22 @@ locals {
       "cloudresourcemanager.googleapis.com",
     ]
   }
+  extra_services_for_tests = {
+    simple_bucket = []
+    root = [
+      "storage-api.googleapis.com",
+    ]
+  }
+  // The services enabled in the projects used for running tests.
+  // Made by combining per_module_services and extra_services_for_tests.
+  per_module_test_services = {
+    for module, module_services in local.per_module_services:
+    module => setunion(module_services, lookup(local.extra_services_for_tests, module, []))
+  }
 }
 
 module "project" {
-  for_each = local.per_module_services
+  for_each = local.per_module_test_services
 
   source  = "terraform-google-modules/project-factory/google"
   version = "~> 18.0"

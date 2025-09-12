@@ -15,6 +15,7 @@
  */
 
 locals {
+  // The roles in metadata.yaml are generated from per_module_roles.
   per_module_roles = {
     simple_bucket = [
       "roles/storage.admin",
@@ -30,6 +31,18 @@ locals {
       "roles/iam.serviceAccountUser",
     ]
   }
+  extra_roles_for_tests = {
+    simple_bucket = []
+    root = [
+      "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+    ]
+  }
+  // The roles given to the service accounts used for running tests.
+  // Made by combining per_module_roles and extra_roles_for_tests.
+  per_module_test_roles = {
+    for module, module_roles in local.per_module_roles:
+    module => setunion(module_roles, lookup(local.extra_roles_for_tests, module, []))
+  }
 }
 
 resource "google_service_account" "int_test" {
@@ -42,12 +55,12 @@ resource "google_service_account" "int_test" {
 
 resource "google_project_iam_member" "int_test" {
   // For each pair (moduleName, role), make a map entry from
-  //   "moduleName.role" => {key, serviceAccount, role)
+  //   "moduleName.role" => {key, serviceAccount, role}
   // to apply below. Structure from https://discuss.hashicorp.com/t/foreach-loop-with-nested-list/54610.
   for_each = {
     for combination in flatten([
       for moduleName, proj in module.project : [
-        for role in local.per_module_roles[moduleName]: {
+        for role in local.per_module_test_roles[moduleName]: {
           key             = "${moduleName}.${role}"
           service_account = google_service_account.int_test[moduleName]
           role            = role
