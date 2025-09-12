@@ -26,4 +26,3 @@ output "sa_keys_per_module" {
   }
   sensitive = true
 }
-
