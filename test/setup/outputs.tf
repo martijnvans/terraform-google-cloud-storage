@@ -27,6 +27,3 @@ output "sa_keys_per_module" {
   sensitive = true
 }
 
-output "per_module_test_isolation" {
-  value = true
-}
