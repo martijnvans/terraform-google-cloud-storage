@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-output "project_id" {
-  value = module.project.project_id
+output "project_ids_per_module" {
+  value = {
+    for module_name, v in module.project : module_name => v.project_id
+  }
 }
 
-output "sa_key" {
-  value     = google_service_account_key.int_test.private_key
+output "sa_keys_per_module" {
+  value = {
+    for module_name, v in google_service_account_key.int_test : module_name => v.private_key
+  }
   sensitive = true
 }
